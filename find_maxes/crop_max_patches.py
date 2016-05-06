@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--gpuid',       type = int, help = 'Use gpu.')
     parser.add_argument('--do-maxes',    action = 'store_true', help = 'Output max patches.')
     parser.add_argument('--do-deconv',   action = 'store_true', help = 'Output deconv patches.')
+    parser.add_argument('--do-full-deconv',   action = 'store_true', help = 'Output full deconv patches.')
     parser.add_argument('--do-deconv-norm', action = 'store_true', help = 'Output deconv-norm patches.')
     parser.add_argument('--do-backprop', action = 'store_true', help = 'Output backprop patches.')
     parser.add_argument('--do-backprop-norm', action = 'store_true', help = 'Output backprop-norm patches.')
@@ -44,7 +45,7 @@ def main():
                            raw_scale=255,
                            image_dims=(256, 256))
 
-    assert args.do_maxes or args.do_deconv or args.do_deconv_norm or args.do_backprop or args.do_backprop_norm or args.do_info, 'Specify at least one do_* option to output.'
+    assert args.do_maxes or args.do_deconv or args.do_deconv_norm or args.do_full_deconv or args.do_backprop or args.do_backprop_norm or args.do_info, 'Specify at least one do_* option to output.'
 
     with open(args.nmt_pkl, 'rb') as ff:
         nmt = pickle.load(ff)
@@ -58,7 +59,7 @@ def main():
     with WithTimer('Saved %d images per unit for %s units %d:%d.' % (args.N, args.layer, args.idx_begin, args.idx_end)):
         output_max_patches(mt, net, args.layer, args.idx_begin, args.idx_end,
                            args.N, args.datadir, args.filelist, args.outdir,
-                           (args.do_maxes, args.do_deconv, args.do_deconv_norm, args.do_backprop, args.do_backprop_norm, args.do_info))
+                           (args.do_maxes, args.do_deconv, args.do_deconv_norm, args.do_full_deconv, args.do_backprop, args.do_backprop_norm, args.do_info))
 
 
 

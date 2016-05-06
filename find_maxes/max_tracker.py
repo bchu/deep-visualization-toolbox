@@ -191,8 +191,8 @@ def get_max_data_extent(net, layer, rc, is_conv):
 
 
 def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, datadir, filelist, outdir, do_which):
-    do_maxes, do_deconv, do_deconv_norm, do_backprop, do_backprop_norm, do_info = do_which
-    assert do_maxes or do_deconv or do_deconv_norm or do_backprop or do_backprop_norm or do_info, 'nothing to do'
+    do_maxes, do_deconv, do_deconv_norm, do_full_deconv, do_backprop, do_backprop_norm, do_info = do_which
+    assert do_maxes or do_deconv or do_deconv_norm or do_full_deconv or do_backprop or do_backprop_norm or do_info, 'nothing to do'
 
     mt = max_tracker
     rc = RegionComputer()
@@ -270,7 +270,7 @@ def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, dat
                     print >>info_file, '%d %d' % tuple(mt.max_locs[channel_idx, max_idx]),
                 print >>info_file, filename
 
-            if not (do_maxes or do_deconv or do_deconv_norm or do_backprop or do_backprop_norm):
+            if not (do_maxes or do_deconv or do_deconv_norm or do_full_deconv or do_backprop or do_backprop_norm):
                 continue
 
 
@@ -293,10 +293,26 @@ def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, dat
                 with WithTimer('Save img  ', quiet = not do_print):
                     save_caffe_image(out_arr, os.path.join(unit_dir, 'maxim_%03d.png' % max_idx_0),
                                      autoscale = False, autoscale_center = 0)
-                
+
+            if do_full_deconv:
+                diffs = net.blobs[layer].diff * 0
+                diffs[0][channel_idx] = net.blobs[layer].data[0,channel_idx]
+                with WithTimer('Deconv    ', quiet = not do_print):
+                    net.deconv_from_layer(layer, diffs)
+
+                out_arr = np.zeros((3,size_ii,size_jj), dtype='float32')
+                out_arr[:, out_ii_start:out_ii_end, out_jj_start:out_jj_end] = net.blobs['data'].diff[0,:,data_ii_start:data_ii_end,data_jj_start:data_jj_end]
+                if out_arr.max() == 0:
+                    print 'Warning: Deconv out_arr in range', out_arr.min(), 'to', out_arr.max(), 'ensure force_backward: true in prototxt'
+                with WithTimer('Save img  ', quiet = not do_print):
+                    save_caffe_image(out_arr, os.path.join(unit_dir, 'full_deconv_%03d.png' % max_idx_0),
+                                     autoscale = False, autoscale_center = 0)
+
             if do_deconv or do_deconv_norm:
                 diffs = net.blobs[layer].diff * 0
                 if len(diffs.shape) == 4:
+                    # HACK/WORKAROUND since we no longer take into account whether a layer is a conv layer:
+                    im_idx, im_class, ii, jj = mt.max_locs[channel_idx, max_idx]
                     diffs[0,channel_idx,ii,jj] = 1.0
                 else:
                     diffs[0,channel_idx] = 1.0
