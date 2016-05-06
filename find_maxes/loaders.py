@@ -3,13 +3,13 @@
 from pylab import *
 
 # Make sure that caffe is on the python path:
-caffe_root = '../../'  # this file is expected to be in {caffe_root}/experiments/something
-import sys
-loadpath = caffe_root + 'python_cpu'
-print '= = = CAFFE LOADER: LOADING CPU VERSION from path: %s = = =' % loadpath
-sys.path.insert(0, loadpath)     # Use CPU compiled code for backprop vis/etc
+# caffe_root = '../../'  # this file is expected to be in {caffe_root}/experiments/something
+# import sys
+# loadpath = caffe_root + 'python_cpu'
+# print '= = = CAFFE LOADER: LOADING CPU VERSION from path: %s = = =' % loadpath
+# sys.path.insert(0, loadpath)     # Use CPU compiled code for backprop vis/etc
 import caffe
-caffe.set_mode_cpu()
+# caffe.set_mode_cpu()
 
 
 

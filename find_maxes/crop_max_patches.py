@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import numpy as np
 import argparse
 import ipdb as pdb
 import cPickle as pickle
@@ -13,7 +14,7 @@ from max_tracker import output_max_patches
 def main():
     parser = argparse.ArgumentParser(description='Loads a pickled NetMaxTracker and outputs one or more of {the patches of the image, a deconv patch, a backprop patch} associated with the maxes.')
     parser.add_argument('--N',           type = int, default = 9, help = 'Note and save top N activations.')
-    parser.add_argument('--gpu',         action = 'store_true', help = 'Use gpu.')
+    parser.add_argument('--gpuid',       type = int, help = 'Use gpu.')
     parser.add_argument('--do-maxes',    action = 'store_true', help = 'Output max patches.')
     parser.add_argument('--do-deconv',   action = 'store_true', help = 'Output deconv patches.')
     parser.add_argument('--do-deconv-norm', action = 'store_true', help = 'Output deconv-norm patches.')
@@ -23,22 +24,20 @@ def main():
     parser.add_argument('--idx-begin',   type = int, default = None, help = 'Start at this unit (default: all units).')
     parser.add_argument('--idx-end',     type = int, default = None, help = 'End at this unit (default: all units).')
     
-    parser.add_argument('nmt_pkl',       type = str, help = 'Which pickled NetMaxTracker to load.')
-    parser.add_argument('net_prototxt',  type = str, help = 'Network prototxt to load')
-    parser.add_argument('net_weights',   type = str, help = 'Network weights to load')
-    parser.add_argument('datadir',       type = str, help = 'Directory to look for files in')
-    parser.add_argument('filelist',      type = str, help = 'List of image files to consider, one per line. Must be the same filelist used to produce the NetMaxTracker!')
-    parser.add_argument('outdir',        type = str, help = r'Which output directory to use. Files are output into outdir/layer/unit_%%04d/{maxes,deconv,backprop}_%%03d.png')
-    parser.add_argument('layer',         type = str, help = 'Which layer to output')
-    #parser.add_argument('--mean', type = str, default = '', help = 'data mean to load')
+    parser.add_argument('--nmt_pkl',       type = str, help = 'Which pickled NetMaxTracker to load.')
+    parser.add_argument('--net_prototxt',  type = str, help = 'Network prototxt to load')
+    parser.add_argument('--net_weights',   type = str, help = 'Network weights to load')
+    parser.add_argument('--datadir',       type = str, help = 'Directory to look for files in')
+    parser.add_argument('--filelist',      type = str, help = 'List of image files to consider, one per line. Must be the same filelist used to produce the NetMaxTracker!')
+    parser.add_argument('--outdir',        type = str, help = r'Which output directory to use. Files are output into outdir/layer/unit_%%04d/{maxes,deconv,backprop}_%%03d.png')
+    parser.add_argument('--layer',         type = str, help = 'Which layer to output')
+    parser.add_argument('--mean', type = str, default = '', help = 'data mean to load')
     args = parser.parse_args()
 
-    if args.gpu:
-        caffe.set_mode_gpu()
-    else:
-        caffe.set_mode_cpu()
+    caffe.set_mode_gpu()
+    caffe.set_device(args.gpuid)
 
-    imagenet_mean = load_imagenet_mean()
+    imagenet_mean = np.load(args.mean)
     net = caffe.Classifier(args.net_prototxt, args.net_weights,
                            mean=imagenet_mean,
                            channel_swap=(2,1,0),
