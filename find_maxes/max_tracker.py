@@ -237,6 +237,11 @@ def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, dat
                 data_indices = rc.convert_region(layer, 'data', layer_indices)
                 data_ii_start,data_ii_end,data_jj_start,data_jj_end = data_indices
 
+                data_jj_start = max(0, data_jj_start)
+                data_jj_end = min(data_size_jj, data_jj_end)
+                data_ii_start = max(0, data_ii_start)
+                data_ii_end = min(data_size_ii, data_ii_end)
+
                 touching_imin = (data_ii_start == 0)
                 touching_jmin = (data_jj_start == 0)
 
