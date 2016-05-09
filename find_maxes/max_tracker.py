@@ -83,11 +83,11 @@ class NetMaxTracker(object):
         blacklist = ['_split_', 'data', 'pool1', 'pool5']
         layers = net.blobs.keys()
         self.layers = filter(lambda x: all([(b not in x) for b in blacklist]), layers)
-        # DEBUG
-        self.layers = ['res4a', 'res4b', 'res4c', 'res4d', 'res4e', 'res4f']
+        # # DEBUG
+        # self.layers = ['res2a', 'res2b', 'res2c', 'res4a', 'res4b', 'res4c', 'res4d', 'res4e', 'res4f']
         print 'layers', self.layers
         self.is_conv = ['conv' in x or 'res' in x for x in self.layers]
-        print 'is_conv', self.is_conv
+        # print 'is_conv', self.is_conv
         for layer,is_conv in zip(self.layers, self.is_conv):
             blob = net.blobs[layer].data
             self.max_trackers[layer] = MaxTracker(is_conv, blob.shape[1], n_top = self.n_top,
@@ -179,7 +179,7 @@ def save_representations(net, datadir, filelist, layer, first_N = None):
 
 def get_max_data_extent(net, layer, rc, is_conv):
     '''Gets the maximum size of the data layer that can influence a unit on layer.'''
-    if False:
+    if is_conv:
         conv_size = net.blobs[layer].data.shape[2:4]        # e.g. (13,13) for conv5
         layer_slice_middle = (conv_size[0]/2,conv_size[0]/2+1, conv_size[1]/2,conv_size[1]/2+1)   # e.g. (6,7,6,7,), the single center unit
         data_slice = rc.convert_region(layer, 'data', layer_slice_middle)
@@ -231,7 +231,7 @@ def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, dat
             if do_print:
                 print '%s   Output file/image(s) %d/%d' % (datetime.now().ctime(), cc * num_top, n_total_images)
 
-            if False:
+            if mt.is_conv:
                 # Compute the focus area of the data layer
                 layer_indices = (ii,ii+1,jj,jj+1)
                 data_indices = rc.convert_region(layer, 'data', layer_indices)
@@ -283,8 +283,8 @@ def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, dat
                 reproduced_val = net.blobs[layer].data[0,channel_idx,ii,jj]
             else:
                 reproduced_val = net.blobs[layer].data[0,channel_idx]
-            # if abs(reproduced_val - recorded_val) > .1:
-            #     print 'Warning: recorded value %s is suspiciously different from reproduced value %s. Is the filelist the same?' % (recorded_val, reproduced_val)
+            if abs(reproduced_val - recorded_val) > .1:
+                print 'Warning: recorded value %s is suspiciously different from reproduced value %s. Is the filelist the same?' % (recorded_val, reproduced_val)
 
             if do_maxes:
                 #grab image from data layer, not from im (to ensure preprocessing / center crop details match between image and deconv/backprop)
@@ -300,8 +300,8 @@ def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, dat
                 with WithTimer('Deconv    ', quiet = not do_print):
                     net.deconv_from_layer(layer, diffs)
 
-                out_arr = np.zeros((3,size_ii,size_jj), dtype='float32')
-                out_arr[:, out_ii_start:out_ii_end, out_jj_start:out_jj_end] = net.blobs['data'].diff[0,:,data_ii_start:data_ii_end,data_jj_start:data_jj_end]
+                out_arr = np.zeros((3,data_size_ii,data_size_jj), dtype='float32')
+                out_arr[:, :, :] = net.blobs['data'].diff[0,:,:,:]
                 if out_arr.max() == 0:
                     print 'Warning: Deconv out_arr in range', out_arr.min(), 'to', out_arr.max(), 'ensure force_backward: true in prototxt'
                 with WithTimer('Save img  ', quiet = not do_print):
@@ -312,7 +312,7 @@ def output_max_patches(max_tracker, net, layer, idx_begin, idx_end, num_top, dat
                 diffs = net.blobs[layer].diff * 0
                 if len(diffs.shape) == 4:
                     # HACK/WORKAROUND since we no longer take into account whether a layer is a conv layer:
-                    im_idx, im_class, ii, jj = mt.max_locs[channel_idx, max_idx]
+                    # im_idx, im_class, ii, jj = mt.max_locs[channel_idx, max_idx]
                     diffs[0,channel_idx,ii,jj] = 1.0
                 else:
                     diffs[0,channel_idx] = 1.0

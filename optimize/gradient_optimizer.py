@@ -214,13 +214,11 @@ class GradientOptimizer(object):
         if is_conv:
             if params.push_spatial == (0,0):
                 recommended_spatial = (data_shape[2]/2, data_shape[3]/2)
-                params.push_spatial = recommended_spatial
-                print ("Fixed spatial! %s", params.push_spatial)
-                # print ('WARNING: A unit on a conv layer (%s) is being optimized, but push_spatial\n'
-                #        'is %s, so the upper-left unit in the channel is selected. To avoid edge\n'
-                #        'effects, you might want to optimize a non-edge unit instead, e.g. the center\n'
-                #        'unit by using `--push_spatial "%s"`\n'
-                #        % (params.push_layer, params.push_spatial, recommended_spatial))
+                print ('WARNING: A unit on a conv layer (%s) is being optimized, but push_spatial\n'
+                       'is %s, so the upper-left unit in the channel is selected. To avoid edge\n'
+                       'effects, you might want to optimize a non-edge unit instead, e.g. the center\n'
+                       'unit by using `--push_spatial "%s"`\n'
+                       % (params.push_layer, params.push_spatial, recommended_spatial))
         else:
             assert params.push_spatial == (0,0), 'For FC layers, spatial indices must be (0,0)'
         

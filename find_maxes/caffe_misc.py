@@ -87,15 +87,41 @@ class RegionComputer(object):
 
     def __init__(self):
         #self.net = net
+        self.bottom_size = None
+        def converter(bot_size, top_size, filter_width = (1,1), stride = (1,1), pad = (0,0), type='conv'):
+            if bot_size is None:
+                bot_size = self.bottom_size
+            self.bottom_size = top_size
+            if type == 'conv':
+                return get_conv_converter(bot_size, top_size, filter_width, stride, pad)
+            else:
+                return get_pool_converter(bot_size, top_size, filter_width, stride, pad)
+
         _tmp = []
         _tmp.append(('data', None))
-        _tmp.append(('conv1', get_conv_converter((227,227), (55,55), (11,11), (4,4))))
-        _tmp.append(('pool1', get_pool_converter((55,55),   (27,27), (3,3),   (2,2))))
-        _tmp.append(('conv2', get_conv_converter((27,27),   (27,27), (5,5),   (1,1),  (2,2))))
-        _tmp.append(('pool2', get_pool_converter((27,27),   (13,13), (3,3),   (2,2))))
-        _tmp.append(('conv3', get_conv_converter((13,13),   (13,13), (3,3),   (1,1),  (1,1))))
-        _tmp.append(('conv4', get_conv_converter((13,13),   (13,13), (3,3),   (1,1),  (1,1))))
-        _tmp.append(('conv5', get_conv_converter((13,13),   (13,13), (3,3),   (1,1),  (1,1))))
+        _tmp.append(('conv1', converter((224,224), (112,112), (7,7), (2,2), (3,3))))
+        _tmp.append(('pool1', converter(None,      (56,56),   (3,3), (2,2), type='pool')))
+
+        _tmp.append(('res2a', converter(None,      (56,56), (3,3), (1,1), (1,1))))
+        _tmp.append(('res2b', converter(None,      (56,56), (3,3), (1,1), (1,1))))
+        _tmp.append(('res2c', converter(None,      (56,56), (3,3), (1,1), (1,1))))
+
+        _tmp.append(('res3a', converter(None,      (28,28), (3,3), (1,1), (1,1))))
+        _tmp.append(('res3b', converter(None,      (28,28), (3,3), (1,1), (1,1))))
+        _tmp.append(('res3c', converter(None,      (28,28), (3,3), (1,1), (1,1))))
+        _tmp.append(('res3d', converter(None,      (28,28), (3,3), (1,1), (1,1))))
+
+        _tmp.append(('res4a', converter(None,      (14,14), (3,3), (1,1), (1,1))))
+        _tmp.append(('res4b', converter(None,      (14,14), (3,3), (1,1), (1,1))))
+        _tmp.append(('res4c', converter(None,      (14,14), (3,3), (1,1), (1,1))))
+        _tmp.append(('res4d', converter(None,      (14,14), (3,3), (1,1), (1,1))))
+        _tmp.append(('res4e', converter(None,      (14,14), (3,3), (1,1), (1,1))))
+        _tmp.append(('res4f', converter(None,      (14,14), (3,3), (1,1), (1,1))))
+
+        _tmp.append(('res5a', converter(None,      (7,7), (3,3), (1,1), (1,1))))
+        _tmp.append(('res5b', converter(None,      (7,7), (3,3), (1,1), (1,1))))
+        _tmp.append(('res5c', converter(None,      (7,7), (3,3), (1,1), (1,1))))
+
         self.names = [tt[0] for tt in _tmp]
         self.converters = [tt[1] for tt in _tmp]
         
