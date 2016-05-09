@@ -106,19 +106,22 @@ class RegionComputer(object):
         _tmp.append(('res2b', converter(None,      (56,56), (3,3), (1,1), (1,1))))
         _tmp.append(('res2c', converter(None,      (56,56), (3,3), (1,1), (1,1))))
 
-        _tmp.append(('res3a', converter(None,      (28,28), (3,3), (1,1), (1,1))))
+        #_tmp.append(('res3a', converter(None,      (28,28), (3,3), (2,2))))
+        _tmp.append(('res3a', converter(None,      (28,28), (5,5), (2,2), (2,2))))
         _tmp.append(('res3b', converter(None,      (28,28), (3,3), (1,1), (1,1))))
         _tmp.append(('res3c', converter(None,      (28,28), (3,3), (1,1), (1,1))))
         _tmp.append(('res3d', converter(None,      (28,28), (3,3), (1,1), (1,1))))
 
-        _tmp.append(('res4a', converter(None,      (14,14), (3,3), (1,1), (1,1))))
+        #_tmp.append(('res4a', converter(None,      (14,14), (3,3), (2,2))))
+        _tmp.append(('res4a', converter(None,      (14,14), (5,5), (2,2), (2,2))))
         _tmp.append(('res4b', converter(None,      (14,14), (3,3), (1,1), (1,1))))
         _tmp.append(('res4c', converter(None,      (14,14), (3,3), (1,1), (1,1))))
         _tmp.append(('res4d', converter(None,      (14,14), (3,3), (1,1), (1,1))))
         _tmp.append(('res4e', converter(None,      (14,14), (3,3), (1,1), (1,1))))
         _tmp.append(('res4f', converter(None,      (14,14), (3,3), (1,1), (1,1))))
 
-        _tmp.append(('res5a', converter(None,      (7,7), (3,3), (1,1), (1,1))))
+        #_tmp.append(('res5a', converter(None,      (7,7), (3,3), (2,2))))
+        _tmp.append(('res5a', converter(None,      (7,7), (5,5), (2,2), (2,2))))
         _tmp.append(('res5b', converter(None,      (7,7), (3,3), (1,1), (1,1))))
         _tmp.append(('res5c', converter(None,      (7,7), (3,3), (1,1), (1,1))))
 
