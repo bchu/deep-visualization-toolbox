@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--datadir',       type = str, help = 'Directory to look for files in')
     parser.add_argument('--filelist',      type = str, help = 'List of image files to consider, one per line. Must be the same filelist used to produce the NetMaxTracker!')
     parser.add_argument('--outdir',        type = str, help = r'Which output directory to use. Files are output into outdir/layer/unit_%%04d/{maxes,deconv,backprop}_%%03d.png')
-    parser.add_argument('--layer',         type = str, help = 'Which layer to output')
+    parser.add_argument('--layer',         type = str, nargs = '*', help = 'Which layer to output')
     parser.add_argument('--mean', type = str, default = '', help = 'data mean to load')
     args = parser.parse_args()
 
@@ -47,19 +47,20 @@ def main():
 
     assert args.do_maxes or args.do_deconv or args.do_deconv_norm or args.do_full_deconv or args.do_backprop or args.do_backprop_norm or args.do_info, 'Specify at least one do_* option to output.'
 
-    with open(args.nmt_pkl, 'rb') as ff:
-        nmt = pickle.load(ff)
-    mt = nmt.max_trackers[args.layer]
+    for layer in args.layer:
+        with open(args.nmt_pkl, 'rb') as ff:
+            nmt = pickle.load(ff)
+        mt = nmt.max_trackers[layer]
 
-    if args.idx_begin is None:
-        args.idx_begin = 0
-    if args.idx_end is None:
-        args.idx_end = mt.max_vals.shape[0]
+        if args.idx_begin is None:
+            args.idx_begin = 0
+        if args.idx_end is None:
+            args.idx_end = mt.max_vals.shape[0]
     
-    with WithTimer('Saved %d images per unit for %s units %d:%d.' % (args.N, args.layer, args.idx_begin, args.idx_end)):
-        output_max_patches(mt, net, args.layer, args.idx_begin, args.idx_end,
-                           args.N, args.datadir, args.filelist, args.outdir,
-                           (args.do_maxes, args.do_deconv, args.do_deconv_norm, args.do_full_deconv, args.do_backprop, args.do_backprop_norm, args.do_info))
+        with WithTimer('Saved %d images per unit for %s units %d:%d.' % (args.N, layer, args.idx_begin, args.idx_end)):
+            output_max_patches(mt, net, layer, args.idx_begin, args.idx_end,
+                               args.N, args.datadir, args.filelist, args.outdir,
+                               (args.do_maxes, args.do_deconv, args.do_deconv_norm, args.do_full_deconv, args.do_backprop, args.do_backprop_norm, args.do_info))
 
 
 

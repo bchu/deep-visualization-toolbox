@@ -85,6 +85,7 @@ class NetMaxTracker(object):
         self.layers = filter(lambda x: all([(b not in x) for b in blacklist]), layers)
         # # DEBUG
         # self.layers = ['res2a', 'res2b', 'res2c', 'res4a', 'res4b', 'res4c', 'res4d', 'res4e', 'res4f']
+        self.layers = ['res5a', 'res5b', 'res5c']
         print 'layers', self.layers
         self.is_conv = ['conv' in x or 'res' in x for x in self.layers]
         # print 'is_conv', self.is_conv
